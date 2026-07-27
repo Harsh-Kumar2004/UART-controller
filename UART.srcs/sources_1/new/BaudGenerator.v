@@ -1,7 +1,7 @@
 module BaudGenerator (
     input  wire        clk,
     input  wire        reset,
-    input  wire [15:0] divisor,
+    input  wire [15:0] divisor, // if divisor is set to 4 it means for every four clock signals there would be one baud_tick
 
     output reg         baud_tick
 );

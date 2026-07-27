@@ -4,11 +4,11 @@ module FIFO #(
     input  wire       clk,
     input  wire       reset,
 
-    input  wire       wr_en,    // tells you whether wr_data is valid or invalid
+    input  wire       wr_en,    //  if 1 wr_data is valid else invalid
     input  wire [7:0] wr_data,
 
-    input  wire       rd_en,    // tells you whether tx unit is ready to recieve data or not
-    output reg  [7:0] rd_data,
+    input  wire       rd_en,
+    output wire [7:0] rd_data,
 
     output wire       full,
     output wire       empty
@@ -22,18 +22,22 @@ module FIFO #(
 
     wire write, read;
 
+    // comment to myself: if fifo is to be read at clock edge 1, make sure rd_en pulse is high before clock edge 1, but after clock edge 0
+    // if fifo is to be written at clock edge 1, wr_en pulse should be high before clock edge 1 (and after clock edge 0, else clock 0 could also write)
+
     assign write = wr_en && !full;
     assign read  = rd_en && !empty;
 
     assign full  = (count == FIFO_DEPTH);
     assign empty = (count == 0);
 
+    assign rd_data = fifo_buffer[read_ptr];
+
     always @(posedge clk or posedge reset) begin 
-        if (reset) begin 
+        if (reset) begin  
             count     <= 0;
             write_ptr <= 0;
             read_ptr  <= 0;
-            rd_data   <= 8'b0;
         end
 
         else begin 
@@ -43,7 +47,6 @@ module FIFO #(
             end
 
             if (read) begin 
-                rd_data  <= fifo_buffer[read_ptr];
                 read_ptr <= read_ptr + 1;
             end
 
